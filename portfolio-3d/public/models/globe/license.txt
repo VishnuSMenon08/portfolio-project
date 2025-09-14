@@ -1,0 +1,11 @@
+Model Information:
+* title:	Animated Sci-Fi Globe - V2 [test]
+* source:	https://sketchfab.com/3d-models/animated-sci-fi-globe-v2-test-3b62a44bfb274d20ac92d08f0e686f49
+* author:	s7ntech (https://sketchfab.com/s7ntech)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Animated Sci-Fi Globe - V2 [test]" (https://sketchfab.com/3d-models/animated-sci-fi-globe-v2-test-3b62a44bfb274d20ac92d08f0e686f49) by s7ntech (https://sketchfab.com/s7ntech) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

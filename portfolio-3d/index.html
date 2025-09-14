@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <canvas class="web-gl"></canvas>
+
+  <!-- HUD Overlay -->
+  <div id="hud">
+    <!-- Top Bar -->
+    <div id="hud-top">
+      <div role="button" id="hud-1" class="hud-section">Starship Engine Core</div>
+      <div role="button" id="hud-2" class="hud-section">Navigation Console</div>
+      <div role="button" id="hud-3" class="hud-section">Spacesuit Design Lab </div>
+    </div>
+
+    <!-- Center Radar -->
+    <div id="hud-radar">
+      <div class="radar-circle"></div>
+      <div class="radar-circle"></div>
+      <div class="radar-circle"></div>
+      <div class="radar-sweep"></div>
+    </div>
+
+    <!-- Bottom Stats -->
+    <div id="hud-bottom">
+      <div id="health-bar" class="bar">
+        <span>FUEL</span>
+        <div class="bar-fill" style="--percent: 0.8;"></div>
+      </div>
+      <div id="ammo-bar" class="bar">
+        <span>AMMO</span>
+        <div class="bar-fill" style="--percent: 0.8;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="hud-compass">
+    <div id="compass-strip">
+      <span>N</span><span>S</span>
+      <span>E</span><span>W</span>
+    </div>
+  </div>
+    <script type="module" src="/src/main.js">  
+    </script>
+  </body>
+</html>
