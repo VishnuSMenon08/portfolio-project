@@ -2,6 +2,12 @@ html,body {
   display: block;
   margin: 0px ;
   overflow: hidden;
+  font-family: ui-monospace, monospace;
+  background: var(--bg);
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+  color:var(--muted);
 }
 
 .web-gl{
@@ -150,4 +156,104 @@ height: 100vh;
 }
 #compass-strip span {
   flex: 1;
+}
+
+/* Terminal Styles follow */
+
+:root{
+  --bg:#061018;
+  --panel:#071420;
+  --neon-1: #00ffea; /* cyan */
+  --neon-2: #7c5cff; /* purple */
+  --muted:#9fb3c8;
+}
+
+/* terminal card */
+.terminal {
+  width:min(880px, 92vw);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border-radius:12px;
+  padding:28px;
+  box-shadow:
+    0 8px 40px rgba(2,6,23,0.75),
+    0 0 40px rgba(124,92,255,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.04);
+  position:relative;
+  top : 30px;
+}
+
+.terminal::before{
+  content:'';
+  position:absolute;
+  left:0; right:0; top:0;
+  height:6px;
+  background: linear-gradient(90deg, var(--neon-2), var(--neon-1));
+  transform: translateY(-2px) scaleY(0.6);
+  opacity:0.18;
+  pointer-events:none;
+}
+
+ /* Display horizontal  */
+.terminal-inner {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* <- horizontal stacking */
+  gap: 20px;
+}
+
+/* Display vertical  */
+/* .terminal-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+} */
+
+.pane {
+  border-radius:8px;
+  padding:18px;
+  min-height:120px;
+  border: 1px solid rgba(255,255,255,0.025);
+}
+
+.pane h2{
+  margin:0 0 10px 0;
+  font-size:1.05rem;
+  color:var(--neon-1);
+  text-shadow:0 0 8px rgba(0,255,234,0.12);
+}
+
+.pane h2::after{
+  content:'';
+  display:block;
+  height:2px;
+  width:36px;
+  margin-top:10px;
+  background: linear-gradient(90deg, rgba(0,255,234,0.8), rgba(124,92,255,0.5));
+  border-radius:2px;
+}
+
+.pane p{
+  margin:8px 0 0;
+  font-size:0.95rem;
+  line-height:1.45;
+}
+
+.pane ul{
+  margin:8px 0 0 18px;
+  padding:0;
+  list-style: disc;
+}
+
+.pane ul li{
+  margin:6px 0;
+}
+
+.pane ul li::marker{
+  color: var(--neon-2);
+}
+
+@media (max-width:700px){
+  .terminal-inner{
+    grid-template-columns: 1fr;
+  }
 }

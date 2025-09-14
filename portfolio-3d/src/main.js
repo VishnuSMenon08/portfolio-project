@@ -6,16 +6,16 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 // import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-import {SpaceStation, SpaceShip, DeepSpace, Launchpad} from './scene';
+import {SpaceStation, SpaceShip, DeepSpace, Launchpad, Globe} from './scene';
 import {canvas, designLabBtn, engineCoreBtn, navConsoleBtn} from './vendor';
 
 
-let labelMeshes = [];
 let sceneModels = {
   "spaceShip" : null,
   "spaceStation" : null,
   "spaceStation2" : null,
-  "launchpad" : null
+  "launchpad" : null,
+  "globe" : null
 }
 
 window.addEventListener('resize', () => {
@@ -59,7 +59,7 @@ engineCoreBtn.addEventListener('click', () => {
 });
 
 navConsoleBtn.addEventListener('click', () => {
-  sceneModels.spaceShip.model.position.set(
+    sceneModels.spaceShip.model.position.set(
     sceneModels.spaceStation2.model.position.x - 5,
     sceneModels.spaceStation2.model.position.y,
     sceneModels.spaceStation2.model.position.z + 3
@@ -75,12 +75,6 @@ const screenSize = {
 }
 
 const gltfLoader = new GLTFLoader();
-//Wrapper to load GLTB models
-const loadModel = (url) => {
-  return new Promise((resolve, reject) => {
-    gltfLoader.load(url, (gltf) => resolve(gltf), undefined, reject);
-  });
-}
 
 //Function to load textures
 const applyTextures = (model, textureMap) => {
@@ -178,15 +172,6 @@ window.addEventListener('keyup', (e) => {
 
 const textureLoader =  new THREE.TextureLoader();
 // add labels
-// sceneModels.spaceStation.traverse((child) => {
-//   if (child.isMesh) {
-//     if (child.material.name == "Station_Cylinder"){
-//       const html = "<div><h1> Vishnu Menon </h1> <p>I create web-apps and software tools </p></div>"
-//       attachHTMLToMesh(child, html);
-//       labelMeshes.push(child);
-//     }
-//   }
-// });
 
 sceneModels.spaceShip = new SpaceShip(gltfLoader, textureLoader);
 await sceneModels.spaceShip.loadAndInitialize(scene);
@@ -199,6 +184,9 @@ sceneModels.spaceStation2.loadAndInitialize(scene);
 
 sceneModels.launchpad = new Launchpad(gltfLoader);
 sceneModels.launchpad.loadAndInitialize(scene);
+
+sceneModels.globe = new Globe(gltfLoader);
+sceneModels.globe.loadAndInitialize(scene);
 
 
 // Camera orbit state
@@ -220,7 +208,9 @@ function animate(time){
   const ellpasedTime = clock.getElapsedTime();
   sceneModels.spaceStation.playAnimationLoop();
   sceneModels.spaceStation2.playAnimationLoop();
+  sceneModels.globe.playAnimationLoop();
   sceneModels.launchpad.playCustomAnimations(ellpasedTime);
+  sceneModels.globe.playCustomAnimations(ellpasedTime);
 
   if (sceneModels.spaceShip.model) {
     // === Camera Orbit ===
@@ -259,7 +249,8 @@ function animate(time){
   }
 
   renderer.render(scene, camera);
-  updateLabels(labelMeshes, camera);
+  // updateLabels(labelMeshes, camera);
+  sceneModels.spaceStation.updateLabels(camera);
   labelRenderer.render(scene, camera);
   window.requestAnimationFrame(animate);
 }

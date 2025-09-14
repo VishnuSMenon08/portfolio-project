@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { engineCoreHtml} from './content';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 export class SpaceStation {
     filePath = "./models/space_station/scene.gltf"
@@ -6,6 +8,7 @@ export class SpaceStation {
         this.modelGltf;
         this.model;
         this.mixer;
+        this.labelMeshes = [];
         this.gltfLoader = gltfLoader;
         this.pointLightA = new THREE.PointLight( "#fa9f28", 200);
         this.pointLightB = new THREE.PointLight( "#fa9f28", 200);
@@ -22,6 +25,7 @@ export class SpaceStation {
         this.model.add(this.pointLightB);
         this.mixer = new THREE.AnimationMixer(this.model);
         this._applyAnimations();
+        this._renderHtml();
     }
 
     _applyAnimations(){
@@ -43,6 +47,47 @@ export class SpaceStation {
           }
     }
 
+    updateLabels(camera) {
+      this.labelMeshes.forEach((mesh) => {
+        const screenPos = new THREE.Vector3();
+        mesh.getWorldPosition(screenPos);
+        console.log
+    
+        const distance = camera.position.distanceTo(screenPos);
+        const div = mesh.children.find(c => c.isCSS2DObject)?.element;
+    
+        if (div) {
+          // Scale inversely with distance
+          const scale = THREE.MathUtils.clamp(10 / distance , 0, 0.5);
+          // div.style.transform = `scale(${scale})`;
+          // div.style.zoom = scale;
+    
+          // Fade in when closer than X
+          const opacity = THREE.MathUtils.clamp(1 - distance / 15, 0, 0.7);
+          div.style.opacity = opacity;
+        }
+      });
+    }
+
+    _attachHTMLToMesh(mesh, htmlContent) {
+        // console.log(htmlContent)
+        const div = document.createElement('div');
+        div.className = 'terminal';
+        div.innerHTML = htmlContent;
+        const label = new CSS2DObject(div);
+        mesh.add(label); // attaches HTML to mesh
+    }
+
+    _renderHtml() {
+        this.model.traverse((child) => {
+          if (child.isMesh) {
+            if (child.material.name == "Station_Cylinder"){
+              this._attachHTMLToMesh(child, engineCoreHtml);
+              this.labelMeshes.push(child);
+            }
+          }
+        });
+    }
 }
 
 export class SpaceShip{
@@ -158,7 +203,6 @@ export class Launchpad {
         this.modelGltf;
         this.model;
         this.mixer;
-        this.customAnimations = [];
         this.gltfLoader = gltfLoader;
         this.textureLoader = textureLoader;
         this.textureMap;
@@ -170,7 +214,7 @@ export class Launchpad {
     async loadAndInitialize (scene) {
         this.modelGltf = await this.loadModel(this.filePath);
         this.model = this.modelGltf.scene;
-        this.model.position.set(20, -5, 7);
+        this.model.position.set(20, -7, 7);
         this.model.rotation.x = -0.2;
         this.model.scale.set(0.06,0.06,0.06);
         scene.add(this.model);
@@ -216,6 +260,67 @@ export class Launchpad {
 
     playCustomAnimations(ellpasedTime){
         this._rotateAnimation(ellpasedTime);
+        this._gravityAnimation(ellpasedTime);
+
+    }
+
+}
+
+export class Globe {
+    filePath = "./models/globe/scene.gltf"
+    constructor(gltfLoader, textureLoader){
+        this.modelGltf;
+        this.model;
+        this.mixer;
+        this.gltfLoader = gltfLoader;
+        this.textureLoader = textureLoader;
+        this.textureMap;
+        this.pointLightA = new THREE.PointLight("#fa9f28", 100);
+        this.pointLightB = new THREE.PointLight("#fa9f28", 100);
+        this.customAnimation = true;
+    }
+
+    async loadAndInitialize (scene) {
+        this.modelGltf = await this.loadModel(this.filePath);
+        this.model = this.modelGltf.scene;
+        this.model.position.set(20, -3, 6.5); 
+        this.model.scale.set(1,1,1);
+        scene.add(this.model);
+        this.pointLightA.position.set(0,2,2);
+        // this.pointLightB.position.set(0,-2, -2);
+        this.model.add(this.pointLightA);
+        // this.model.add(this.pointLightB);
+        // this._applyTextures();
+        this.mixer = new THREE.AnimationMixer(this.model);
+        this._applyAnimations();
+    }
+
+    _applyAnimations(){
+        this.modelGltf.animations.forEach((clip) => {
+            const action = this.mixer.clipAction(clip);
+            action.play();
+          });
+    }
+    
+    _gravityAnimation(ellpasedTime){
+        if (this.model){
+            this.model.position.y = Math.sin(ellpasedTime) - 2;
+        }
+    }
+
+    loadModel (url){
+        return new Promise((resolve, reject) => {
+          this.gltfLoader.load(url, (gltf) => resolve(gltf), undefined, reject);
+        });
+    }
+
+    playAnimationLoop(){
+        if (this.mixer) {
+            this.mixer.update(0.01);
+          }
+    }
+
+    playCustomAnimations(ellpasedTime){
         this._gravityAnimation(ellpasedTime);
 
     }
