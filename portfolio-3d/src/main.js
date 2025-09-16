@@ -7,9 +7,10 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockControls.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {SpaceStation, SpaceShip, DeepSpace, Launchpad, Globe} from './scene';
-import {canvas, designLabBtn, engineCoreBtn, navConsoleBtn} from './vendor';
+import {canvas, designLabBtn, engineCoreBtn, navConsoleBtn, fuelBar, fuelTank, warningBar} from './vendor';
 import {LabelHandler} from './labels'
 import { engineCoreHtml, NavConsoleHtml, designLabHtml } from './content';
+import { AudioMixer } from './audioMixer';
 
 
 let sceneModels = {
@@ -25,6 +26,17 @@ let sceneLabels = {
   "designLab" : null,
   "navConsole" : null
 }
+
+let sceneAudios = {
+  "space" : null,
+  "engineCore" : null,
+  "designLab" : null,
+  "navConsole" : null,
+  "warning" : null,
+  "fuelPump" : null
+}
+
+let refuelling = false;
 
 window.addEventListener('resize', () => {
   screenSize.height = window.innerHeight;
@@ -77,6 +89,19 @@ navConsoleBtn.addEventListener('click', () => {
 const screenSize = {
   height: window.innerHeight,
   width: window.innerWidth
+}
+
+const refuelShip = async () => {
+  fuelTank.innerHTML = "Refueling..."
+  refuelling = true;
+  while(fuel <= 100){
+      let i = 1;
+      fuel += i;
+      fuelBar.style.width = `${fuel}%`;
+      await new Promise(r => setTimeout(r, 100));
+    }
+  fuelTank.innerHTML = "FUEL";
+  refuelling = false;
 }
 
 //Function to load textures
@@ -137,15 +162,24 @@ const keys = {
   "d" : false
 };
 
-const speed = 0.1; // movement speed
+let speed = 0.1; // movement speed
+let accelaration = 0;
+fuelBar.style.width = "100%";
+let fuel = 100;
 window.addEventListener('keydown', (e) => { 
-  if (keys[e.key] !== undefined){
+  if (keys[e.key] !== undefined && fuel > 0 && !refuelling){
     keys[e.key] = true;
-  }    
+    accelaration = 0.001;
+    fuel -= 2;
+    fuelBar.style.width = `${fuel}%`;
+  }
   });
+
 window.addEventListener('keyup', (e) => { 
   if (keys[e.key] !== undefined) {
     keys[e.key] = false;
+    accelaration = 0;
+    speed = 0.1;
   }
 });
 
@@ -157,7 +191,7 @@ sceneModels.spaceShip = new SpaceShip(gltfLoader, textureLoader);
 await sceneModels.spaceShip.loadAndInitialize(scene);
 
 sceneModels.spaceStation = new SpaceStation(gltfLoader);
-sceneModels.spaceStation.loadAndInitialize(scene);
+await sceneModels.spaceStation.loadAndInitialize(scene);
 
 sceneModels.spaceStation2 = new DeepSpace(gltfLoader);
 sceneModels.spaceStation2.loadAndInitialize(scene);
@@ -167,6 +201,18 @@ sceneModels.launchpad.loadAndInitialize(scene);
 
 sceneModels.globe = new Globe(gltfLoader);
 sceneModels.globe.loadAndInitialize(scene);
+
+//LOAD AUDIO EFFECTS
+const listner = new THREE.AudioListener();
+camera.add(listner);
+sceneAudios.space = new AudioMixer(listner);
+sceneAudios.space.loadSoundFx("./audio/space_bgm.mp3");
+
+sceneAudios.warning = new AudioMixer(listner);
+sceneAudios.warning.registerSFX("./audio/warning.mp3");
+
+sceneAudios.fuelPump = new AudioMixer(listner);
+sceneAudios.fuelPump.registerSFX("./audio/fuel_pump.mp3");
 
 
 // Camera orbit state
@@ -183,7 +229,7 @@ document.addEventListener('mousemove', (e) => {
 
 const cameraOffset = new THREE.Vector3(0, 3, -6);
 const clock = new THREE.Clock();
-
+const maxSpeed = 0.15;
 function animate(time){
   const ellpasedTime = clock.getElapsedTime();
   sceneModels.spaceStation.playAnimationLoop();
@@ -226,7 +272,36 @@ function animate(time){
       );
       sceneModels.spaceShip.model.quaternion.slerp(targetRot, 0.2); // smooth rotation
     }
+
+    if(speed < maxSpeed){
+        speed += accelaration;
+      }
+    
+    if( fuel <= 0){
+        refuelShip();
+        sceneAudios.fuelPump.playAudio(2);
+      }
+    // Accelaration SFX
+    if(sceneAudios.space.audio.isPlaying && speed != 0.1){
+        sceneAudios.space.audio.setPlaybackRate(1 + (speed*3));
+        // sceneAudios.space.audio.setVolume(Math.min(1, 0.8 + speed * 0.05));
+      }else if (sceneAudios.space.audio.isPlaying){
+        sceneAudios.space.audio.setPlaybackRate(1);
+      }
+    
+    // Warning SFX
+    if(sceneModels.spaceShip.checkWithinZone(sceneModels.spaceStation.model)){
+      console.log("WARNING...");
+      sceneAudios.warning.playAudio();
+      warningBar.classList.remove("hidden");
+      warningBar.classList.add("visible");
+    }else{
+      warningBar.classList.add("hidden");
+      warningBar.classList.remove("visible");
+    }
   }
+
+
 
   // updateLabels(labelMeshes, camera);
   sceneLabels.engineCore.updateLabels(camera);

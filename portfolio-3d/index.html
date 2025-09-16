@@ -17,6 +17,12 @@
       <div role="button" id="hud-3" class="hud-section">Spacesuit Design Lab </div>
     </div>
 
+  <!-- Warning label -->
+  <div id="warning-bar" class="warning-label" role="alert" aria-live="assertive">
+    <span class="warning-icon" aria-hidden="true">⚠️</span>
+    <span class="warning-text">Warning: return to zone</span>
+  </div>
+
     <!-- Center Radar -->
     <div id="hud-radar">
       <div class="radar-circle"></div>
@@ -28,8 +34,8 @@
     <!-- Bottom Stats -->
     <div id="hud-bottom">
       <div id="health-bar" class="bar">
-        <span>FUEL</span>
-        <div class="bar-fill" style="--percent: 0.8;"></div>
+        <span id="fuel-tank">FUEL</span>
+        <div id = "fuel-indicator" class="bar-fill"></div>
       </div>
     </div>
   </div>

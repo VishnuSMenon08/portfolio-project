@@ -101,6 +101,14 @@ export class SpaceShip{
           this.gltfLoader.load(url, (gltf) => resolve(gltf), undefined, reject);
         });
       }
+
+    checkWithinZone(referenceModel){
+        const shipPos = new THREE.Vector3();
+        const refPos = new THREE.Vector3();
+        this.model.getWorldPosition(shipPos);
+        referenceModel.getWorldPosition(refPos);
+        return shipPos.distanceTo(refPos) > 40? true: false;
+    }
 }
 
 export class DeepSpace {

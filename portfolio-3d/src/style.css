@@ -103,7 +103,7 @@ height: 100vh;
   position: absolute;
   top: 0;
   left: 0;
-  width: calc(var(--percent) * 100%);
+  /* width: calc(var(--percent) * 100%); */
   height: 100%;
   background: linear-gradient(90deg, cyan, rgb(188, 56, 245));
   box-shadow: 0 0 10px cyan;
@@ -166,6 +166,14 @@ height: 100vh;
   --neon-1: #00ffea; /* cyan */
   --neon-2: #7c5cff; /* purple */
   --muted:#9fb3c8;
+
+  --warn-bg:#ff3b30;
+  --warn-bg-dark:#c92b21;
+  --warn-accent:#ffd7cc;
+  --warn-text:#fff;
+  --radius:10px;
+  --pad:10px 14px;
+  --glow: 0 6px 18px rgba(255,59,48,0.22);
 }
 
 /* terminal card */
@@ -259,4 +267,78 @@ height: 100vh;
   .terminal-inner{
     grid-template-columns: 1fr;
   }
+}
+
+/* warning label styles */
+.warning-label{
+  align-items:center;
+  gap:10px;
+  padding:var(--pad);
+  border-radius:var(--radius);
+  border-color: linear-gradient(180deg, var(--warn-bg), var(--warn-bg-dark));
+  color:var(--warn-text);
+  font-weight:600;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  box-shadow: var(--glow), inset 0 -2px 0 rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,0.15);
+  user-select: none;
+  transform-origin: center;
+  /* blinking animation */
+  animation: warn-blink 1.2s steps(2, start) infinite;
+  position : absolute;
+  top : 40vh;
+  left : 35vw;
+}
+
+.warning-icon{
+  display:inline-grid;
+  place-items:center;
+  width:28px;
+  height:28px;
+  border-radius:7px;
+  background: rgba(255,255,255,0.12);
+  color:var(--warn-accent);
+  font-size:16px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+}
+
+.warning-text{
+  font-size:0.95rem;
+  line-height:1;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.35);
+  color: #ed291bc0;
+}
+
+/* subtle scale + opacity blink*/
+@keyframes warn-blink {
+  0%   { opacity: 1; transform: scale(1); box-shadow: var(--glow); }
+  50%  { opacity: 0.22; transform: scale(0.995); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  100% { opacity: 1; transform: scale(1); box-shadow: var(--glow); }
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .warning-label { animation: none; }
+}
+
+/* Optional smaller / inline variant */
+.warning-label.small {
+  padding:6px 10px;
+  border-radius:8px;
+  font-size:0.85rem;
+}
+
+/* Optional non-blinking modifier */
+.warning-label.solid {
+  animation: none;
+}
+
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.visible{
+  display: inline-flex;
+  visibility: visible;
 }
