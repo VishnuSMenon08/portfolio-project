@@ -197,7 +197,7 @@ height: 100vh;
  /* Display horizontal  */
 .terminal-inner {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* <- horizontal stacking */
+  grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 }
 
@@ -234,8 +234,9 @@ height: 100vh;
 
 .pane p{
   margin:8px 0 0;
-  font-size:0.95rem;
+  font-size:0.70rem;
   line-height:1.45;
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .pane ul{
@@ -246,6 +247,8 @@ height: 100vh;
 
 .pane ul li{
   margin:6px 0;
+  font-size:0.70rem;
+  color: rgb(255, 255, 255, 0.95);
 }
 
 .pane ul li::marker{

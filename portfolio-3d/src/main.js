@@ -8,6 +8,8 @@ import { PointerLockControls } from 'three/examples/jsm/controls/PointerLockCont
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 import {SpaceStation, SpaceShip, DeepSpace, Launchpad, Globe} from './scene';
 import {canvas, designLabBtn, engineCoreBtn, navConsoleBtn} from './vendor';
+import {LabelHandler} from './labels'
+import { engineCoreHtml, NavConsoleHtml, designLabHtml } from './content';
 
 
 let sceneModels = {
@@ -16,6 +18,12 @@ let sceneModels = {
   "spaceStation2" : null,
   "launchpad" : null,
   "globe" : null
+}
+
+let sceneLabels = {
+  "engineCore" : null,
+  "designLab" : null,
+  "navConsole" : null
 }
 
 window.addEventListener('resize', () => {
@@ -32,11 +40,9 @@ window.addEventListener('resize', () => {
 //   fullScreen?document.exitFullscreen():canvas.requestFullscreen();
 // })
 
-
 window.addEventListener('dblclick', () => {
   fppControls.isLocked?fppControls.unlock():fppControls.lock();  // click to lock mouse
 });
-
 
 designLabBtn.addEventListener('click', () => {
     sceneModels.spaceShip.model.position.set(
@@ -68,13 +74,10 @@ navConsoleBtn.addEventListener('click', () => {
   sceneModels.spaceShip.model.rotation.y += 2;
 });
 
-
 const screenSize = {
   height: window.innerHeight,
   width: window.innerWidth
 }
-
-const gltfLoader = new GLTFLoader();
 
 //Function to load textures
 const applyTextures = (model, textureMap) => {
@@ -92,38 +95,6 @@ const applyTextures = (model, textureMap) => {
   });
 }
 
-// For each mesh that needs HTML
-function attachHTMLToMesh(mesh, htmlContent) {
-  const div = document.createElement('div');
-  div.className = 'label';
-  div.innerHTML = htmlContent;
-
-  const label = new CSS2DObject(div);
-  mesh.add(label); // attaches HTML to mesh
-  return div;
-}
-
-function updateLabels(meshes, camera) {
-  meshes.forEach((mesh) => {
-    const screenPos = new THREE.Vector3();
-    mesh.getWorldPosition(screenPos);
-
-    const distance = camera.position.distanceTo(screenPos);
-    const div = mesh.children.find(c => c.isCSS2DObject)?.element;
-
-    if (div) {
-      // Scale inversely with distance
-      const scale = THREE.MathUtils.clamp(10 / distance , 0, 0.5);
-      // div.style.transform = `scale(${scale})`;
-      // div.style.zoom = scale;
-
-      // Fade in when closer than X
-      const opacity = THREE.MathUtils.clamp(1 - distance / 10, 0, 0.5);
-      div.style.opacity = opacity;
-    }
-  });
-}
-
 // CREATE Scene
 const scene = new THREE.Scene()
 
@@ -132,6 +103,10 @@ const renderer = new THREE.WebGLRenderer({canvas: canvas});
 renderer.setSize(screenSize.width, screenSize.height);
 renderer.setPixelRatio(window.devicePixelRatio);
 
+//create camera
+const camera = new THREE.PerspectiveCamera(45, screenSize.width/screenSize.height, 0.1, 100);
+camera.position.set(-2, 2, 20)
+
 // Create Label renderer
 const labelRenderer = new CSS2DRenderer();
 labelRenderer.setSize(window.innerWidth, window.innerHeight);
@@ -139,9 +114,15 @@ labelRenderer.domElement.style.position = 'absolute';
 labelRenderer.domElement.style.top = '0px';
 document.body.appendChild(labelRenderer.domElement);
 
-//create camera
-const camera = new THREE.PerspectiveCamera(45, screenSize.width/screenSize.height, 0.1, 100);
-camera.position.set(-2, 2, 20)
+// Add Labels
+sceneLabels.engineCore = new LabelHandler(labelRenderer, engineCoreHtml);
+sceneLabels.engineCore.attachHtml(scene, [-9, -3.3, -20]);
+
+sceneLabels.designLab = new LabelHandler(labelRenderer, designLabHtml);
+sceneLabels.designLab.attachHtml(scene, [12, -3, 1]);
+
+sceneLabels.navConsole = new LabelHandler(labelRenderer, NavConsoleHtml);
+sceneLabels.navConsole.attachHtml(scene, [-15, -3, -45]);
 
 // Add Light
 const ambientLight = new THREE.AmbientLight("#faba66", 5);
@@ -169,9 +150,8 @@ window.addEventListener('keyup', (e) => {
 });
 
 // LOAD MODELS
-
+const gltfLoader = new GLTFLoader();
 const textureLoader =  new THREE.TextureLoader();
-// add labels
 
 sceneModels.spaceShip = new SpaceShip(gltfLoader, textureLoader);
 await sceneModels.spaceShip.loadAndInitialize(scene);
@@ -197,7 +177,7 @@ document.addEventListener('mousemove', (e) => {
   if (document.pointerLockElement) {
     yaw -= e.movementX * sensitivity;
     pitch += e.movementY * sensitivity;
-    pitch = Math.max(-Math.PI/3, Math.min(Math.PI/3, pitch)); // clamp vertical
+    pitch = Math.max(-Math.PI/3, Math.min(Math.PI/3, pitch));
   }
 });
 
@@ -248,9 +228,11 @@ function animate(time){
     }
   }
 
-  renderer.render(scene, camera);
   // updateLabels(labelMeshes, camera);
-  sceneModels.spaceStation.updateLabels(camera);
+  sceneLabels.engineCore.updateLabels(camera);
+  sceneLabels.designLab.updateLabels(camera);
+  sceneLabels.navConsole.updateLabels(camera);
+  renderer.render(scene, camera);
   labelRenderer.render(scene, camera);
   window.requestAnimationFrame(animate);
 }

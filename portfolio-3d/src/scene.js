@@ -1,6 +1,4 @@
 import * as THREE from 'three';
-import { engineCoreHtml} from './content';
-import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 export class SpaceStation {
     filePath = "./models/space_station/scene.gltf"
@@ -25,7 +23,6 @@ export class SpaceStation {
         this.model.add(this.pointLightB);
         this.mixer = new THREE.AnimationMixer(this.model);
         this._applyAnimations();
-        this._renderHtml();
     }
 
     _applyAnimations(){
@@ -45,48 +42,6 @@ export class SpaceStation {
         if (this.mixer) {
             this.mixer.update(0.005);
           }
-    }
-
-    updateLabels(camera) {
-      this.labelMeshes.forEach((mesh) => {
-        const screenPos = new THREE.Vector3();
-        mesh.getWorldPosition(screenPos);
-        console.log
-    
-        const distance = camera.position.distanceTo(screenPos);
-        const div = mesh.children.find(c => c.isCSS2DObject)?.element;
-    
-        if (div) {
-          // Scale inversely with distance
-          const scale = THREE.MathUtils.clamp(10 / distance , 0, 0.5);
-          // div.style.transform = `scale(${scale})`;
-          // div.style.zoom = scale;
-    
-          // Fade in when closer than X
-          const opacity = THREE.MathUtils.clamp(1 - distance / 15, 0, 0.7);
-          div.style.opacity = opacity;
-        }
-      });
-    }
-
-    _attachHTMLToMesh(mesh, htmlContent) {
-        // console.log(htmlContent)
-        const div = document.createElement('div');
-        div.className = 'terminal';
-        div.innerHTML = htmlContent;
-        const label = new CSS2DObject(div);
-        mesh.add(label); // attaches HTML to mesh
-    }
-
-    _renderHtml() {
-        this.model.traverse((child) => {
-          if (child.isMesh) {
-            if (child.material.name == "Station_Cylinder"){
-              this._attachHTMLToMesh(child, engineCoreHtml);
-              this.labelMeshes.push(child);
-            }
-          }
-        });
     }
 }
 
@@ -316,7 +271,7 @@ export class Globe {
 
     playAnimationLoop(){
         if (this.mixer) {
-            this.mixer.update(0.01);
+            this.mixer.update(0.03);
           }
     }
 
